@@ -312,6 +312,9 @@ static struct device_attribute power_supply_attrs[] = {
 	POWER_SUPPLY_ATTR(enable_jeita_detection),
 	POWER_SUPPLY_ATTR(allow_hvdcp3),
 	POWER_SUPPLY_ATTR(max_pulse_allowed),
+	/* Huaqin modify for ZQL1820-HQ000002 Identify adapter ID to upper by gaochao at 2018/10/24 start */
+	POWER_SUPPLY_ATTR(adapter_id),
+	/* Huaqin modify for ZQL1820-HQ000002 Identify adapter ID to upper by gaochao at 2018/10/24 ebd */
 	/* Local extensions of type int64_t */
 	POWER_SUPPLY_ATTR(charge_counter_ext),
 	/* Properties of type `const char *' */
