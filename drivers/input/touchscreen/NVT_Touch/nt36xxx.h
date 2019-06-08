@@ -96,7 +96,7 @@ extern const uint16_t gesture_key_array[];
 
 // Huaqin add for nvt_tp check function. by zhengwu.lu. at  2018/03/01  start
 #define BOOT_UPDATE_FIRMWARE 1
-#define DJ_BOOT_UPDATE_FIRMWARE_NAME "novatek_ts_fw_dj.bin"
+#define DJ_BOOT_UPDATE_FIRMWARE_NAME "novatek_ts_fw_8D.bin"
 #define TXD_BOOT_UPDATE_FIRMWARE_NAME "novatek_ts_fw_txd.bin"
 //#define BOOT_UPDATE_FIRMWARE_NAME "novatek_ts_fw.bin"
 // Huaqin add for nvt_tp check function. by zhengwu.lu. at  2018/03/01  end
