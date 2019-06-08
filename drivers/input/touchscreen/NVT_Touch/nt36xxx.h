@@ -102,7 +102,7 @@ extern const uint16_t gesture_key_array[];
 #endif
 #define BOOT_UPDATE_FIRMWARE 1
 //huaqin modify for update firmware by limengxia at 20190116 start
-#define BOOT_UPDATE_FIRMWARE_NAME "novatek_ts_fw_v8C.bin"
+#define BOOT_UPDATE_FIRMWARE_NAME "novatek_ts_fw_v8D.bin"
 //huaqin modify for update firmware by limengxia at 20190116 end
 //---ESD Protect.---
 /* Huaqin add ZQL1820-663 by zhangxiude for ESD  function on start */
