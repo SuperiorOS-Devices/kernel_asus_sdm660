@@ -665,7 +665,6 @@
 #define KEY_SARSENSOR_FAR		0x2eb
 
 //Huaqin add for asus gesture by xudongfang at 2018/9/5 start
-#define KEY_TP_GESTURE_SWIPE_UP 	248
 #define KEY_TP_GESTURE_DOUBLE_CLICK 	KEY_WAKEUP
 #define KEY_TP_GESTURE_C 		249
 #define KEY_TP_GESTURE_E 		250
@@ -673,6 +672,10 @@
 #define KEY_TP_GESTURE_V 		252
 #define KEY_TP_GESTURE_W 		253
 #define KEY_TP_GESTURE_Z 		254
+#define KEY_TP_GESTURE_SWIPE_UP         255
+#define KEY_TP_GESTURE_SWIPE_DOWN       256
+#define KEY_TP_GESTURE_SWIPE_LEFT       257
+#define KEY_TP_GESTURE_SWIPE_RIGHT      258
 //Huaqin add for asus gesture by xudongfang at 2018/9/5 end
 
 
