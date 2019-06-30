@@ -9,6 +9,18 @@
 #include <linux/mm.h>
 #include <linux/trace_events.h>
 #include <linux/memcontrol.h>
+#include <linux/migrate.h>
+#include <linux/page_owner.h>
+
+char *migrate_reason_names[MR_TYPES] = {
+	"compaction",
+	"memory_failure",
+	"memory_hotplug",
+	"syscall_or_cpuset",
+	"mempolicy_mbind",
+	"numa_misplaced",
+	"cma",
+};
 
 static const struct trace_print_flags pageflag_names[] = {
 	{1UL << PG_locked,		"locked"	},
@@ -46,6 +58,9 @@ static const struct trace_print_flags pageflag_names[] = {
 #if defined(CONFIG_IDLE_PAGE_TRACKING) && defined(CONFIG_64BIT)
 	{1UL << PG_young,		"young"		},
 	{1UL << PG_idle,		"idle"		},
+#endif
+#ifdef CONFIG_ZCACHE
+	{1UL << PG_was_active,		"was_active"	},
 #endif
 };
 
@@ -103,6 +118,7 @@ void dump_page_badflags(struct page *page, const char *reason,
 void dump_page(struct page *page, const char *reason)
 {
 	dump_page_badflags(page, reason, 0);
+	dump_page_owner(page);
 }
 EXPORT_SYMBOL(dump_page);
 
@@ -168,7 +184,7 @@ EXPORT_SYMBOL(dump_vma);
 
 void dump_mm(const struct mm_struct *mm)
 {
-	pr_emerg("mm %p mmap %p seqnum %d task_size %lu\n"
+	pr_emerg("mm %p mmap %p seqnum %llu task_size %lu\n"
 #ifdef CONFIG_MMU
 		"get_unmapped_area %p\n"
 #endif
@@ -198,7 +214,7 @@ void dump_mm(const struct mm_struct *mm)
 #endif
 		"%s",	/* This is here to hold the comma */
 
-		mm, mm->mmap, mm->vmacache_seqnum, mm->task_size,
+		mm, mm->mmap, (long long) mm->vmacache_seqnum, mm->task_size,
 #ifdef CONFIG_MMU
 		mm->get_unmapped_area,
 #endif

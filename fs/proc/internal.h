@@ -209,6 +209,7 @@ struct pde_opener {
 extern const struct inode_operations proc_link_inode_operations;
 
 extern const struct inode_operations proc_pid_link_inode_operations;
+extern const struct file_operations proc_reclaim_operations;
 
 extern void proc_init_inodecache(void);
 extern struct inode *proc_get_inode(struct super_block *, struct proc_dir_entry *);
@@ -253,6 +254,15 @@ extern void sysctl_head_put(struct ctl_table_header *);
 #else
 static inline void proc_sys_init(void) { }
 static inline void sysctl_head_put(struct ctl_table_header *head) { }
+#endif
+
+/*
+ * uid.c
+ */
+#ifdef CONFIG_PROC_UID
+extern int proc_uid_init(void);
+#else
+static inline void proc_uid_init(void) { }
 #endif
 
 /*
