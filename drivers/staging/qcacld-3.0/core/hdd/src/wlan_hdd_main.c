@@ -106,6 +106,7 @@
 #include "wlan_hdd_spectralscan.h"
 #include "sme_power_save_api.h"
 #include "wlan_hdd_sysfs.h"
+#include <linux/compiler.h>
 #ifdef WLAN_FEATURE_APF
 #include "wlan_hdd_apf.h"
 #endif
@@ -12672,7 +12673,7 @@ dev_alloc_err:
 	return -ENODEV;
 }
 
-static void wlan_hdd_state_ctrl_param_destroy(void)
+static void __maybe_unused  wlan_hdd_state_ctrl_param_destroy(void)
 {
 	cdev_del(&wlan_hdd_state_cdev);
 	device_destroy(class, device);
