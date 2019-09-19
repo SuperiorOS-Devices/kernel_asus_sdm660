@@ -1731,7 +1731,7 @@ static int parse_audio_feature_unit(struct mixer_build *state, int unitid,
 	}
 
 	/* determine the input source type and name */
-	err = check_input_term(state, hdr->bSourceID, &iterm);
+	err = __check_input_term(state, hdr->bSourceID, &iterm);
 	if (err < 0)
 		return err;
 
@@ -1925,7 +1925,7 @@ static int parse_audio_mixer_unit(struct mixer_build *state, int unitid,
 		/* no bmControls field (e.g. Maya44) -> ignore */
 		if (desc->bLength <= 10 + input_pins)
 			continue;
-		err = check_input_term(state, desc->baSourceID[pin], &iterm);
+		err = __check_input_term(state, desc->baSourceID[pin], &iterm);
 		if (err < 0)
 			return err;
 		num_ins += iterm.channels;
