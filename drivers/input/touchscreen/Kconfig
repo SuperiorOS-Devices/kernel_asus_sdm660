@@ -1236,8 +1236,6 @@ endif
 
 if MACH_ASUS_X01BD
 source "drivers/input/touchscreen/NVT_Touch_X01BD/Kconfig"
-source "drivers/input/touchscreen/synaptics_dsx_X01BD/Kconfig"
-source "drivers/input/touchscreen/focaltech_touch_X01BD/Kconfig"
 source "drivers/input/touchscreen/hxchipset_X01BD/Kconfig"
 
 config TOUCHSCREEN_HIMAX_CHIPSET

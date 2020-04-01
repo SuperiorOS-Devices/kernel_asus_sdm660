@@ -103,7 +103,5 @@ ifeq ($(CONFIG_MACH_ASUS_X00TD),y)
 obj-$(CONFIG_TOUCHSCREEN_NT36xxx)	+= NVT_Touch/
 else
 obj-$(CONFIG_TOUCHSCREEN_NT36xxx)	+= NVT_Touch_X01BD/
-obj-$(CONFIG_TOUCHSCREEN_SYNAPTICS_DSX) += synaptics_dsx_X01BD/
 obj-$(CONFIG_TOUCHSCREEN_HIMAX_CHIPSET)	+= hxchipset_X01BD/
-obj-$(CONFIG_TOUCHSCREEN_FTS)		+= focaltech_touch_X01BD/
 endif
