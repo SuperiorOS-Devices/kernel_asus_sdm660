@@ -2745,7 +2745,7 @@ int smblib_get_prop_die_health(struct smb_charger *chg,
 #define DCP_CURRENT_UA			2000000
 /* Huaqin add for ZQL1650-71 before BC1.2 500mA before adapter id 1000mA by fangaijun at 2018/4/4 end */
 #else
-#define DCP_CURRENT_UA			500000
+#define DCP_CURRENT_UA			2100000
 #endif
 /* Huaqin add for ZQL1650-1287 factory version remove before BC1.2 500mA before adapter id 1000mA by fangaijun at 2018/5/8 end */
 #define HVDCP_CURRENT_UA		3000000
