@@ -113,6 +113,8 @@ int asus_get_prop_batt_volt(struct smb_charger *chg);
 int asus_get_prop_batt_capacity(struct smb_charger *chg);
 int asus_get_prop_batt_health(struct smb_charger *chg);
 int asus_get_prop_usb_present(struct smb_charger *chg);
+int flag_repeat = 0;
+
 enum ADAPTER_ID {
 	NONE = 0,
 	ASUS_750K,
@@ -3472,7 +3474,7 @@ void asus_batt_RTC_work(struct work_struct *dat)
 	unsigned long batflags;
 	struct timespec new_batAlarm_time;
 	struct timespec mtNow;
-	int RTCSetInterval = 60;
+	int RTCSetInterval = 10800;
 
 	if (!smbchg_dev) {
 		CHG_DBG("%s: driver not ready yet!\n", __func__);
@@ -3511,6 +3513,7 @@ void asus_batt_RTC_work(struct work_struct *dat)
 #define ICL_1500mA	0x3C
 #define ICL_1900mA	0x4C
 #define ICL_2000mA	0x50
+#define ICL_2500mA	0x64
 #define ICL_2850mA	0x72
 #define ICL_3000mA	0x78
 #define ASUS_MONITOR_CYCLE		60000
@@ -3556,6 +3559,8 @@ void smblib_asus_monitor_start(struct smb_charger *chg, int time)
 #define SMBCHG_FAST_CHG_CURRENT_VALUE_1500MA 	0x3C
 #define SMBCHG_FAST_CHG_CURRENT_VALUE_2000MA 	0x50
 #define SMBCHG_FAST_CHG_CURRENT_VALUE_2050MA 	0x52
+#define SMBCHG_FAST_CHG_CURRENT_VALUE_2500MA	0x64
+#define SMBCHG_FAST_CHG_CURRENT_VALUE_2850MA	0x72
 #define SMBCHG_FAST_CHG_CURRENT_VALUE_3000MA 	0x78
 
 /* Huaqin modify for ZQL1820-HQ000002  Adjust JEITA according to customer require by gaochao at 2018/10/11 start */
@@ -3641,7 +3646,7 @@ int smbchg_jeita_judge_state(int old_State, int batt_tempr)
 		result_State = JEITA_STATE_RANGE_100_to_500;
 	//50 <= batt_tempr < 60
 	} else if (batt_tempr < 600) {
-		result_State = JEITA_STATE_RANGE_500_to_600;
+		result_State = JEITA_STATE_RANGE_100_to_500;
 	//60 <= batt_tempr
 	} else{
 		result_State = JEITA_STATE_LARGER_THAN_600;
@@ -3862,7 +3867,7 @@ void jeita_rule(void)
 	case JEITA_STATE_LESS_THAN_0:
 		charging_enable = EN_BAT_CHG_EN_COMMAND_FALSE;
 		FV_CFG_reg_value = SMBCHG_FLOAT_VOLTAGE_VALUE_4P357;
-		FCC_reg_value = SMBCHG_FAST_CHG_CURRENT_VALUE_850MA;
+		FCC_reg_value = SMBCHG_FAST_CHG_CURRENT_VALUE_1400MA;
 		printk("%s: temperature < 0\n", __func__);
 		break;
 	case JEITA_STATE_RANGE_0_to_100:
@@ -3872,7 +3877,7 @@ void jeita_rule(void)
 		FV_CFG_reg_value = SMBCHG_FLOAT_VOLTAGE_VALUE_4P350;                   //reg=1070
 		/* Huaqin modify for ZQL1820-711 Set FCC as 925mA while battery temperature between 0 degree and 10 degree by gaochao at 2018/09/20 start */
 		//FCC_reg_value = SMBCHG_FAST_CHG_CURRENT_VALUE_1400MA;                //reg=1061
-		FCC_reg_value = SMBCHG_FAST_CHG_CURRENT_VALUE_925MA;		//FCC < 1000mA  10% accuracy
+		FCC_reg_value = SMBCHG_FAST_CHG_CURRENT_VALUE_2000MA;		//FCC < 1000mA  10% accuracy
 		/* Huaqin modify for ZQL1820-711 Set FCC as 925mA while battery temperature between 0 degree and 10 degree by gaochao at 2018/09/20 end */
 		printk("%s: 0 <= temperature < 10\n", __func__);
 		rc = SW_recharge(smbchg_dev);
@@ -3881,29 +3886,22 @@ void jeita_rule(void)
 		}
 		break;
 #if 0
-	case JEITA_STATE_RANGE_100_to_200:
+	case JEITA_STATE_RANGE_100_to_500:
 		charging_enable = EN_BAT_CHG_EN_COMMAND_TRUE;
 		//FV_CFG_reg_value = SMBCHG_FLOAT_VOLTAGE_VALUE_4P357;
 		//FCC_reg_value = SMBCHG_FAST_CHG_CURRENT_VALUE_1475MA;
 		FV_CFG_reg_value = SMBCHG_FLOAT_VOLTAGE_VALUE_4P350;                   //reg=1070
-		FCC_reg_value = SMBCHG_FAST_CHG_CURRENT_VALUE_2000MA;             //reg=1061
+		FCC_reg_value = SMBCHG_FAST_CHG_CURRENT_VALUE_3000MA;             //reg=1061
 		printk("%s: 10 <= temperature < 20\n", __func__);
 		rc = SW_recharge(smbchg_dev);
 		if (rc < 0) {
 			printk("%s: SW_recharge failed rc = %d\n", __func__, rc);
 		}
 		break;
-	case JEITA_STATE_RANGE_200_to_500:
+	case JEITA_STATE_RANGE_500_to_600:
 		charging_enable = EN_BAT_CHG_EN_COMMAND_TRUE;
-		if (bat_volt <= 4200000) {
-			FV_CFG_reg_value = SMBCHG_FLOAT_VOLTAGE_VALUE_4P357;
-			FCC_reg_value = SMBCHG_FAST_CHG_CURRENT_VALUE_3000MA;
-		} else {
-			FV_CFG_reg_value = SMBCHG_FLOAT_VOLTAGE_VALUE_4P357;
-			FCC_reg_value = SMBCHG_FAST_CHG_CURRENT_VALUE_1500MA;
-		}
 		FV_CFG_reg_value = SMBCHG_FLOAT_VOLTAGE_VALUE_4P350;
-		FCC_reg_value = SMBCHG_FAST_CHG_CURRENT_VALUE_2000MA;
+		FCC_reg_value = SMBCHG_FAST_CHG_CURRENT_VALUE_2500MA;
 		printk("%s: 20 <= temperature < 50\n", __func__);
 		rc = SW_recharge(smbchg_dev);
 		if (rc < 0) {
@@ -3974,7 +3972,7 @@ void jeita_rule(void)
 
 		charging_enable = EN_BAT_CHG_EN_COMMAND_FALSE;
 		FV_CFG_reg_value = SMBCHG_FLOAT_VOLTAGE_VALUE_4P004;
-		FCC_reg_value = SMBCHG_FAST_CHG_CURRENT_VALUE_1475MA;
+		FCC_reg_value = SMBCHG_FAST_CHG_CURRENT_VALUE_1500MA;
 		printk("%s: temperature >= 55\n", __func__);
 		break;
 	}
@@ -4243,7 +4241,7 @@ void asus_chg_flow_work(struct work_struct *work)
 			printk("%s: Couldn't read fast_CURRENT_LIMIT_CFG_REG\n", __func__);
 		printk("asus_chg_flow_work dcp_USBIN_1_cc=0x%x\n",USBIN_1_cc);
 
-		set_icl = ICL_1000mA;                                                                                                                                 //reg=1370 bit7-bit0
+		set_icl = ICL_1500mA;                                                                                                                                 //reg=1370 bit7-bit0
 		rc = smblib_masked_write(smbchg_dev, USBIN_CURRENT_LIMIT_CFG_REG,
 			USBIN_CURRENT_LIMIT_MASK, set_icl);
 		if (rc < 0)
@@ -4296,6 +4294,8 @@ static void CHG_TYPE_judge(struct smb_charger *chg)
 	// read charger ID via pm660 gpio3
 	adc_result = get_ID_vadc_voltage();
 
+        if(flag_repeat == 0)
+   {
 	if (adc_result <= VADC_THD_300MV) {                                                      //vdm1 < 0.3v
 		printk("CHG_TYPE_judge adc_result1=%d\n",adc_result);
 		ret = gpio_direction_output(global_gpio->ADCPWREN_PMI_GP1, 1);
@@ -4310,14 +4310,16 @@ static void CHG_TYPE_judge(struct smb_charger *chg)
 		printk("CHG_TYPE_judge adc_result2=%d\n",adc_result);
 		if (adc_result >= VADC_THD_1000MV) {                                           //vdm2 > 1v
 			ASUS_ADAPTER_ID = OTHERS;
+                        flag_repeat = 1;
 		} else {
-			if (adc_result >= MIN_750K && adc_result <= MAX_750K)           //0.675 < adc_result < 0.851
+			if (adc_result >= MIN_750K && adc_result <= MAX_750K) {           //0.675 < adc_result < 0.851
 				ASUS_ADAPTER_ID = ASUS_750K;
-			else if (adc_result >= MIN_200K && adc_result <= MAX_200K)    //0.306 < adc_result <  0.406
+                                flag_repeat = 1;
+			} else if (adc_result >= MIN_200K && adc_result <= MAX_200K)    //0.306 < adc_result <  0.406
 				ASUS_ADAPTER_ID = ASUS_200K;
-			else
-				ASUS_ADAPTER_ID = OTHERS;
-		}
+                        }
+                                flag_repeat = 1;
+                }
 	} else {                                                //vdm1
 		if (adc_result >= VADC_THD_900MV)
 			ASUS_ADAPTER_ID = PB;
@@ -4355,7 +4357,6 @@ void asus_adapter_adc_work(struct work_struct *work)
 	#endif
 /* Huaqin modify for ZQL1650 optimize adapter id input_suspend by fangaijun at 2018/03/22 end*/
 	msleep(5);
-	CHG_TYPE_judge(smbchg_dev);
 #if 0
 	//WeiYu: WA for legacy wrong detection of 1.5/3A DCP type
 	//WeiYu ++ disable this part by 0&& due to Vbus will falling
@@ -4375,18 +4376,10 @@ void asus_adapter_adc_work(struct work_struct *work)
 
 	}
 #endif
-	//determine current-setting value for DCP type AC:
-	switch (ASUS_ADAPTER_ID) {
-	case ASUS_750K:
-	case ASUS_200K:
-	case PB:
-	case OTHERS:
-		usb_max_current = ICL_2000mA;
-                break;
-	case ADC_NOT_READY:
-		usb_max_current = ICL_1000mA;
-		break;
-	}
+       	CHG_TYPE_judge(smbchg_dev);
+
+    	usb_max_current = ICL_3000mA;
+
 	rc = smblib_set_usb_suspend(smbchg_dev, 0);
 	if (rc < 0)
 		printk("%s: Couldn't set 1340_USBIN_SUSPEND_BIT 0\n", __func__);
@@ -4451,6 +4444,8 @@ void asus_insertion_initial_settings(struct smb_charger *chg)
 #ifndef CONFIG_MACH_X01BD
 /* Huaqin add for ZQL1650-71 before BC1.2 500mA before adapter id 1000mA by fangaijun at 2018/4/4 start */
 	u8 USBIN_cc;
+
+        flag_repeat = 0;
 /* Huaqin add for ZQL1650-71 before BC1.2 500mA before adapter id 1000mA by fangaijun at 2018/4/4 end */
 #endif
 /* Huaqin add for ZQL1650-1287 factory version remove before BC1.2 500mA before adapter id 1000mA by fangaijun at 2018/5/8 end */
